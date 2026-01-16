@@ -1,0 +1,19 @@
+# AltBank_Data_Migration/models/source/schema.yml
+version: 2
+
+sources:
+  - name: legacy_core
+    database: "{{ var('legacy_database', target.database) }}"
+    schema: "{{ var('legacy_schema') }}"
+    quoting:
+      identifier: true
+    tables:
+      - name: customer_cif          # logical name used in source('legacy_core','customer_cif')
+        identifier: CUSTOMER_CIF    # physical table; case-sensitive, quoted by dbt
+        description: "Legacy CUSTOMER_CIF table"
+        
+        columns:
+          - name: cust_id
+            tests:
+              - not_null
+              - unique
