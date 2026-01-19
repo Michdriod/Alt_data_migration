@@ -32,7 +32,7 @@ clean-targets:         # directories to be removed by `dbt clean`
 vars:
   legacy_database: Alt_migration_db          # or omit to default to target.database
   legacy_schema: legacy_tables      # the schema containing src_* tables
-  field_mapping_seed: customer_field_level_mappings
+  field_mapping_seed: field_level_mappings
 
 seeds:
   AltBank_Data_Migration:

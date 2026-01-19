@@ -114,7 +114,7 @@
 {% endmacro %}
 
 {% macro generate_select_from_mapping(entity, target_table, base_alias='base') %}
-    {%- set seed_name = var('field_mapping_seed', 'customer_field_level_mappings') -%}
+    {%- set seed_name = var('field_mapping_seed', 'field_level_mappings') -%}
     {%- set rel = ref(seed_name) -%}
     {%- set sql -%}
                 select entity, source_column, target_column, target_data_type, rule_type, rule_args, null_handling, is_unique, not_null
@@ -133,6 +133,7 @@
         {%- set idx_rule_type = names.index('rule_type') -%}
         {%- set idx_rule_args = names.index('rule_args') -%}
         {%- set idx_null_handling = names.index('null_handling') -%}
+        {%- set supported = ['direct_map','map_values','parse_date','cast_decimal','convert_kobo_to_naira','derive_monthly_income','prefix_value','split_name_part','legal_name_if_corporate','derive_band_from_score'] -%}
         {%- for r in tbl.rows -%}
             {%- set row = {} -%}
             {%- do row.update({'source_column': r[idx_source_column]}) -%}
@@ -141,8 +142,13 @@
             {%- do row.update({'rule_type': r[idx_rule_type]}) -%}
             {%- do row.update({'rule_args': r[idx_rule_args]}) -%}
             {%- do row.update({'null_handling': r[idx_null_handling]}) -%}
-            {%- set expr = _expr_for_row(row, base_alias) -%}
-            {%- do projections.append(expr) -%}
+            {%- set rt = (r[idx_rule_type] or '') | lower | trim -%}
+            {%- if rt in supported or rt == '' -%}
+                {%- set expr = _expr_for_row(row, base_alias) -%}
+                {%- do projections.append(expr) -%}
+            {%- else -%}
+                {# Skip unsupported/manual rows; implement in model explicitly #}
+            {%- endif -%}
         {%- endfor -%}
     {%- endif -%}
 
